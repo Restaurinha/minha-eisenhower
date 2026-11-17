@@ -121,7 +121,7 @@ button:disabled { opacity: .5; cursor: default; }
   padding: 10px 12px;
 }
 .titulos { flex: 1; min-width: 0; }
-.saudacao { display: block; font-size: .85rem; color: var(--suave); }
+.saudacao { display: block; font-size: .85rem; color: var(--suave); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .topo h1 { margin: 0; font-size: 1.45rem; font-weight: 800; line-height: 1.15; }
 .btn-menu {
   width: 44px;
@@ -622,16 +622,17 @@ input[type="color"] {
 .menu-item.instalar { background: var(--destaque); color: #fff; }
 .menu-item.instalar:hover { background: var(--destaque); opacity: .9; }
 
-/* Botão de atualizar (⟳) no cabeçalho */
+/* Botão de atualizar (⟳) no cabeçalho: discreto, só o ícone */
 .btn-atualizar {
-  width: 44px;
-  height: 44px;
-  padding: 11px;
+  width: 36px;
+  height: 36px;
+  padding: 8px;
   border-radius: 50%;
-  background: var(--destaque-claro);
-  color: var(--destaque);
+  background: none;
+  color: var(--suave);
   flex: none;
 }
+.btn-atualizar svg { width: 20px; height: 20px; }
 .btn-atualizar.girando svg { animation: girar .8s linear infinite; }
 @keyframes girar { to { transform: rotate(360deg); } }
 #versao-app { color: var(--suave); font-size: .75rem; }
