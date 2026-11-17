@@ -244,7 +244,7 @@ async function carregarCategorias() {
 // Cada aba tem sua seção e o título que aparece no cabeçalho
 const ABAS = {
   hoje:        'Hoje',
-  captura:     'Capturar',
+  captura:     'Gravar',
   matriz:      'Matriz',
   indicadores: 'Indicadores',
   categorias:  'Categorias',
@@ -1476,7 +1476,7 @@ mostrarBotaoInstalar();
 // 13c. BOTÃO ATUALIZAR (⟳)
 // =========================================================
 // Mantenha igual à VERSAO do sw.js: aparece no rodapé do menu
-const VERSAO_APP = 'v12';
+const VERSAO_APP = 'v13';
 el('versao-app').textContent = 'versão ' + VERSAO_APP;
 
 // Quando um service worker NOVO assume o controle, recarrega a página uma vez,
