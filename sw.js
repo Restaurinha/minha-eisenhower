@@ -7,7 +7,7 @@
 
 // Troque este número sempre que publicar uma versão nova do app,
 // assim o celular descarta a cópia antiga.
-const VERSAO = 'v9';
+const VERSAO = 'v10';
 const CACHE = 'minha-eisenhower-' + VERSAO;
 
 const ARQUIVOS_DO_APP = [
@@ -31,7 +31,8 @@ const BIBLIOTECAS = [
 self.addEventListener('install', (evento) => {
   evento.waitUntil(
     caches.open(CACHE).then(async (cache) => {
-      await cache.addAll(ARQUIVOS_DO_APP);
+      // cache: 'reload' = baixa do servidor de verdade, ignorando cópias antigas
+      await cache.addAll(ARQUIVOS_DO_APP.map((url) => new Request(url, { cache: 'reload' })));
       // no-cors: a CDN é outro site; guardamos a resposta "fechada" mesmo assim
       await Promise.all(BIBLIOTECAS.map((url) =>
         fetch(url, { mode: 'no-cors' }).then((r) => cache.put(url, r)).catch(() => {})
@@ -74,8 +75,10 @@ self.addEventListener('fetch', (evento) => {
   // sem sinal, usa a cópia guardada.
   // Os dados do Supabase não passam por aqui: vêm sempre direto do banco.
   if (url.origin !== self.location.origin) return;
+  // cache: 'no-cache' = sempre pergunta ao servidor se mudou (o GitHub Pages
+  // mandaria o celular usar a cópia guardada por até 10 minutos)
   evento.respondWith(
-    fetch(pedido)
+    fetch(pedido, { cache: 'no-cache' })
       .then((resposta) => {
         const copia = resposta.clone();
         caches.open(CACHE).then((cache) => cache.put(pedido, copia));

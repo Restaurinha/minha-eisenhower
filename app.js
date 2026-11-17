@@ -1473,6 +1473,51 @@ mostrarBotaoInstalar();
 
 
 // =========================================================
+// 13c. BOTÃO ATUALIZAR (⟳)
+// =========================================================
+// Mantenha igual à VERSAO do sw.js: aparece no rodapé do menu
+const VERSAO_APP = 'v10';
+el('versao-app').textContent = 'versão ' + VERSAO_APP;
+
+// Quando um service worker NOVO assume o controle, recarrega a página uma vez,
+// para a tela passar a usar os arquivos novos.
+// (Na primeiríssima visita não havia controlador: aí não recarrega.)
+const tinhaControlador = !!navigator.serviceWorker?.controller;
+let recarregando = false;
+navigator.serviceWorker?.addEventListener('controllerchange', () => {
+  if (!tinhaControlador || recarregando) return;
+  recarregando = true;
+  location.reload();
+});
+
+el('btn-atualizar').addEventListener('click', async () => {
+  const botao = el('btn-atualizar');
+  botao.classList.add('girando');
+  botao.disabled = true;
+  try {
+    // 1. Pergunta ao GitHub se o sw.js mudou. Se mudou, o novo se instala
+    //    e o "controllerchange" acima recarrega a página com a versão nova.
+    const registro = await navigator.serviceWorker?.getRegistration();
+    await registro?.update();
+
+    // 2. Enquanto isso, atualiza os dados do banco
+    await enviarFilaOffline();
+    await carregarCronometroAtivo();
+    await recarregarListas();
+    if (abaAtual === 'indicadores') await carregarIndicadores();
+    if (abaAtual === 'categorias') await carregarTelaCategorias();
+  } catch (erro) {
+    console.error('Erro ao atualizar:', erro);
+  } finally {
+    setTimeout(() => {   // deixa girar um instante, para dar a sensação de que atualizou
+      botao.classList.remove('girando');
+      botao.disabled = false;
+    }, 600);
+  }
+});
+
+
+// =========================================================
 // 14. COMEÇA AQUI
 // =========================================================
 iniciar();
