@@ -124,6 +124,17 @@ async function abrirApp(usuario) {
   await carregarCronometroAtivo();
   await enviarFilaOffline();   // se ficou captura presa sem internet, envia agora
   await recarregarListas();
+  await atualizarEstadoNotificacoes();
+  abrirTarefaDaNotificacao();
+}
+
+// Tocar numa notificação abre o app com ?tarefa=ID: abrimos a ficha dela
+function abrirTarefaDaNotificacao() {
+  const id = Number(new URLSearchParams(location.search).get('tarefa'));
+  if (!id) return;
+  history.replaceState(null, '', location.pathname);   // limpa o ?tarefa= da barra
+  const tarefa = tarefasCarregadas.find((t) => t.id === id);
+  if (tarefa) abrirFicha(tarefa);
 }
 
 // Quando a internet volta, o navegador avisa com o evento "online"
@@ -611,20 +622,29 @@ el('dlg-salvar').addEventListener('click', () => {
   }
   const categoriaId = el('dlg-categoria').value;
   const origem = el('dlg-origem').value;
+  const lembrete = doCampoLocal(el('dlg-lembrete').value);
 
-  atualizarTarefa({
+  const campos = {
     titulo,
     descricao: el('dlg-descricao').value.trim() || null,
     categoria_id: categoriaId ? Number(categoriaId) : null,
     quadrante: quadranteEscolhido,
     area_id: tarefaAberta.area_id ?? areaAtual,
     prazo: el('dlg-prazo').value || null,
-    lembrete: doCampoLocal(el('dlg-lembrete').value),
+    lembrete,
     status: el('dlg-status').value,
     origem,
     solicitante: origem === 'terceiro' ? (el('dlg-solicitante').value.trim() || null) : null,
     recorrencia: el('dlg-recorrencia').value || null,
-  });
+  };
+
+  // Mudou o horário do lembrete? Então ele precisa poder apitar de novo.
+  // (comparamos como data, porque o banco e o campo escrevem a hora de jeitos diferentes)
+  const antes = tarefaAberta.lembrete ? new Date(tarefaAberta.lembrete).getTime() : null;
+  const depois = lembrete ? new Date(lembrete).getTime() : null;
+  if (antes !== depois) campos.lembrete_enviado_em = null;
+
+  atualizarTarefa(campos);
 });
 
 el('dlg-concluir').addEventListener('click', async () => {
@@ -1232,7 +1252,110 @@ el('form-categoria').addEventListener('submit', async (evento) => {
 
 
 // =========================================================
-// 13. COMEÇA AQUI
+// 13. NOTIFICAÇÕES
+// =========================================================
+// Como funciona:
+//  1. O celular gera uma "inscrição" (um endereço único do aparelho no
+//     serviço de notificações do Google) assinada com a nossa chave pública.
+//  2. Guardamos essa inscrição na tabela push_inscricoes.
+//  3. A função enviar-lembretes, no servidor, usa a inscrição para
+//     mandar o aviso; o sw.js recebe e mostra na tela.
+
+// Chave PÚBLICA de notificação (a privada fica só no servidor)
+const VAPID_PUBLICA =
+  'BKi9363Kb2uFBUmFV4DbvNQuGKSYdA2vhV4e1mPzVfDDCsoM28-kRUC5d2YN7Ed8SaY_NTnV2JWxBLI5T7vIHJ8';
+
+// O navegador quer a chave em bytes, não em texto: esta função converte
+function base64ParaBytes(texto) {
+  const padding = '='.repeat((4 - (texto.length % 4)) % 4);
+  const base64 = (texto + padding).replace(/-/g, '+').replace(/_/g, '/');
+  return Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+}
+
+const suportaNotificacao = () =>
+  'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+
+// Guarda (ou atualiza) a inscrição deste aparelho no banco
+async function salvarInscricao(inscricao) {
+  const json = inscricao.toJSON();
+  const { error } = await db.from('push_inscricoes').upsert(
+    { endpoint: json.endpoint, p256dh: json.keys.p256dh, auth: json.keys.auth },
+    { onConflict: 'endpoint' },   // mesmo aparelho de novo = atualiza, não duplica
+  );
+  if (error) console.error('Erro ao salvar inscrição:', error);
+  return !error;
+}
+
+async function ativarNotificacoes() {
+  if (!suportaNotificacao()) {
+    alert('Este navegador não suporta notificações. No Android, use o app instalado pelo Chrome.');
+    return;
+  }
+
+  const permissao = await Notification.requestPermission();
+  if (permissao !== 'granted') {
+    alert('As notificações foram bloqueadas. Para liberar: configurações do Android → Apps → ' +
+          'Minha Eisenhower (ou Chrome) → Notificações.');
+    return atualizarEstadoNotificacoes();
+  }
+
+  try {
+    const registro = await navigator.serviceWorker.ready;
+    let inscricao = await registro.pushManager.getSubscription();
+    if (!inscricao) {
+      inscricao = await registro.pushManager.subscribe({
+        userVisibleOnly: true,                       // toda mensagem vira notificação visível
+        applicationServerKey: base64ParaBytes(VAPID_PUBLICA),
+      });
+    }
+    await salvarInscricao(inscricao);
+  } catch (erro) {
+    console.error('Erro ao ativar notificações:', erro);
+    alert('Não consegui ativar: ' + erro.message);
+  }
+  await atualizarEstadoNotificacoes();
+}
+
+// Mostra no menu se está ativado. Se já está, renova a inscrição em silêncio
+// (o Google às vezes troca o endereço do aparelho)
+async function atualizarEstadoNotificacoes() {
+  const ligadas = suportaNotificacao() && Notification.permission === 'granted';
+  el('texto-notificacoes').textContent = ligadas ? 'Notificações ativadas ✓' : 'Ativar notificações';
+  el('btn-notificacoes').classList.toggle('ligadas', ligadas);
+  el('btn-testar-notificacao').hidden = !ligadas;
+
+  if (ligadas && navigator.onLine) {
+    try {
+      const registro = await navigator.serviceWorker.ready;
+      const inscricao = await registro.pushManager.getSubscription();
+      if (inscricao) await salvarInscricao(inscricao);
+    } catch (e) { /* sem service worker ainda (ex.: aberto pelo arquivo) */ }
+  }
+}
+
+el('btn-notificacoes').addEventListener('click', () => {
+  if (suportaNotificacao() && Notification.permission === 'granted') {
+    alert('As notificações já estão ativas neste aparelho. Coloque um lembrete na ficha de uma tarefa.');
+  } else {
+    ativarNotificacoes();
+  }
+});
+
+// Teste local: mostra uma notificação sem passar pelo servidor.
+// Se esta aparecer, o aparelho está pronto para receber.
+el('btn-testar-notificacao').addEventListener('click', async () => {
+  const registro = await navigator.serviceWorker.ready;
+  registro.showNotification('Minha Eisenhower', {
+    body: 'Teste ok! É assim que seus lembretes vão aparecer.',
+    icon: 'icone-192.png',
+    badge: 'icone-192.png',
+  });
+  fecharMenu();
+});
+
+
+// =========================================================
+// 14. COMEÇA AQUI
 // =========================================================
 iniciar();
 

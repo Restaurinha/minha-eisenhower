@@ -531,3 +531,10 @@ input[type="color"] {
 .nova-categoria { display: flex; gap: 8px; margin-top: 10px; align-items: center; }
 .nova-categoria input { margin: 0; }
 .nova-categoria button { width: auto; flex: none; }
+
+/* Menu com muitos itens: rola por dentro em telas baixas */
+.menu { overflow-y: auto; }
+#btn-notificacoes.ligadas { color: var(--ok); }
+
+/* Garante que "hidden" sempre esconde, mesmo em elementos com display próprio */
+[hidden] { display: none !important; }
