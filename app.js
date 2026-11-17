@@ -1427,6 +1427,52 @@ el('btn-testar-notificacao').addEventListener('click', async () => {
 
 
 // =========================================================
+// 13b. INSTALAR O APP
+// =========================================================
+// Quando o site cumpre as regras de app (manifesto, ícones, service worker),
+// o Chrome dispara o evento "beforeinstallprompt". Guardamos esse evento
+// e só chamamos .prompt() quando você toca em "Instalar app".
+
+let pedidoDeInstalacao = null;
+
+// Aberto como app instalado (tela cheia) = não precisa do botão
+const estaInstalado = () =>
+  window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+
+function mostrarBotaoInstalar() {
+  el('grupo-instalar').hidden = estaInstalado();
+}
+
+window.addEventListener('beforeinstallprompt', (evento) => {
+  evento.preventDefault();            // não deixa o Chrome mostrar o aviso dele na hora errada
+  pedidoDeInstalacao = evento;
+  mostrarBotaoInstalar();
+});
+
+el('btn-instalar').addEventListener('click', async () => {
+  fecharMenu();
+  if (pedidoDeInstalacao) {
+    pedidoDeInstalacao.prompt();      // abre a janela "Instalar app?" do Chrome
+    const { outcome } = await pedidoDeInstalacao.userChoice;
+    if (outcome === 'accepted') pedidoDeInstalacao = null;
+    return;
+  }
+  // O Chrome ainda não liberou o evento (às vezes demora alguns segundos
+  // na primeira visita): mostra o caminho manual
+  alert('Para instalar: toque nos três pontinhos ⋮ do Chrome, no canto de cima, ' +
+        'e escolha "Instalar app" (ou "Adicionar à tela inicial").');
+});
+
+// Instalou: some com o botão
+window.addEventListener('appinstalled', () => {
+  pedidoDeInstalacao = null;
+  el('grupo-instalar').hidden = true;
+});
+
+mostrarBotaoInstalar();
+
+
+// =========================================================
 // 14. COMEÇA AQUI
 // =========================================================
 iniciar();

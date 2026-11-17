@@ -617,3 +617,7 @@ input[type="color"] {
 
 /* Garante que "hidden" sempre esconde, mesmo em elementos com display próprio */
 [hidden] { display: none !important; }
+
+/* Botão "Instalar app" em destaque no menu */
+.menu-item.instalar { background: var(--destaque); color: #fff; }
+.menu-item.instalar:hover { background: var(--destaque); opacity: .9; }
