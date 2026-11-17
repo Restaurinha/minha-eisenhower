@@ -1108,6 +1108,78 @@ function preencherConcluidas(tarefas) {
 
 
 // =========================================================
+// 10b. FORMATO DA MATRIZ (Quadros ou Lista)
+// =========================================================
+// Não existem duas matrizes: é o mesmo HTML com uma classe a mais.
+// "modo-lista" na div #matriz faz o CSS desenhar tudo em uma coluna.
+// A escolha fica guardada no celular para a próxima vez.
+
+function aplicarFormatoMatriz(formato) {
+  el('matriz').classList.toggle('modo-lista', formato === 'lista');
+  document.querySelectorAll('#formato-matriz button')
+    .forEach((b) => b.classList.toggle('ativa', b.dataset.formato === formato));
+  guardarLocal('formato-matriz', formato);
+}
+
+document.querySelectorAll('#formato-matriz button').forEach((botao) => {
+  botao.addEventListener('click', () => aplicarFormatoMatriz(botao.dataset.formato));
+});
+
+// No formato Lista, tocar no cabeçalho do quadrante abre/fecha a lista.
+// Os quadrantes fechados também ficam guardados.
+const fechados = new Set(lerLocal('quadrantes-fechados', []));
+
+document.querySelectorAll('.quadrante').forEach((quadrante) => {
+  const q = Number(quadrante.dataset.q);
+  const botao = quadrante.querySelector('.cabeca-quadrante');
+  const desenhar = () => {
+    quadrante.classList.toggle('fechado', fechados.has(q));
+    botao.setAttribute('aria-expanded', String(!fechados.has(q)));
+  };
+  desenhar();
+
+  botao.addEventListener('click', () => {
+    if (!el('matriz').classList.contains('modo-lista')) return;   // na grade não fecha
+    fechados.has(q) ? fechados.delete(q) : fechados.add(q);
+    guardarLocal('quadrantes-fechados', [...fechados]);
+    desenhar();
+  });
+});
+
+aplicarFormatoMatriz(lerLocal('formato-matriz', 'quadros'));
+
+
+// =========================================================
+// 10c. SAUDAÇÃO E ATUALIZAÇÃO AUTOMÁTICA
+// =========================================================
+const NOME_USUARIO = 'Leonardo';
+
+function atualizarSaudacao() {
+  const hora = new Date().getHours();
+  const periodo = hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite';
+  el('saudacao').textContent = `${periodo}, ${NOME_USUARIO}`;
+}
+atualizarSaudacao();
+
+// Sem o "puxar para recarregar", o app se atualiza sozinho quando você
+// volta para ele (troca de app, desbloqueia o celular...).
+// "visibilitychange" dispara quando a tela do app aparece ou some.
+let ultimaAtualizacao = Date.now();
+document.addEventListener('visibilitychange', async () => {
+  if (document.visibilityState !== 'visible') return;
+  if (el('tela-app').hidden) return;                       // ainda no login
+  if (el('dlg-tarefa').open) return;                       // não atrapalha quem está editando
+  if (Date.now() - ultimaAtualizacao < 30 * 1000) return;  // no máximo a cada 30 s
+  ultimaAtualizacao = Date.now();
+  atualizarSaudacao();
+  await enviarFilaOffline();
+  await carregarCronometroAtivo();
+  await recarregarListas();
+  if (abaAtual === 'indicadores') carregarIndicadores();
+});
+
+
+// =========================================================
 // 11. ARRASTAR E SOLTAR NA MATRIZ
 // =========================================================
 // A biblioteca Sortable cuida do gesto (dedo ou mouse). Nós só tratamos

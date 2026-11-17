@@ -1,38 +1,32 @@
-/* ===== Cores e base ===== */
+/* ===== Cores e base (tema "Pastel amigável") =====
+   Cada quadrante tem duas cores: a forte (texto, bordas) e a clara (fundo). */
 :root {
-  --fundo: #f4f5f7;
+  --fundo: #fbfaff;
   --cartao: #ffffff;
-  --texto: #1d2330;
-  --suave: #6b7280;
-  --borda: #e2e5ea;
-  --destaque: #1f5fbf;
-  --erro: #c62828;
-  --ok: #2e8b57;
-  --q1: #d64545;  /* Fazer agora  */
-  --q2: #1f5fbf;  /* Agendar      */
-  --q3: #d98a1c;  /* Delegar      */
-  --q4: #7a8291;  /* Eliminar     */
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --fundo: #12151b;
-    --cartao: #1b1f27;
-    --texto: #e8eaee;
-    --suave: #9aa1ad;
-    --borda: #2c323d;
-    --destaque: #5b9bff;
-    --erro: #ff6b6b;
-    --ok: #3fb67a;
-    --q1: #ff6b6b;
-    --q2: #5b9bff;
-    --q3: #f0a640;
-    --q4: #9aa1ad;
-  }
+  --texto: #2b2540;
+  --suave: #6e6788;
+  --borda: #ece8f7;
+  --destaque: #7c3aed;
+  --destaque-claro: #efeafe;
+  --erro: #be123c;
+  --ok: #059669;
+  --sombra: 0 6px 20px rgba(80, 60, 160, .08);
+  --raio: 18px;
+
+  --q1: #9f1239;  --q1-fundo: #ffe4e6;  /* Fazer agora */
+  --q2: #5b21b6;  --q2-fundo: #ede9fe;  /* Agendar     */
+  --q3: #92400e;  --q3-fundo: #fef3c7;  /* Delegar     */
+  --q4: #334155;  --q4-fundo: #e2e8f0;  /* Eliminar    */
 }
 * { box-sizing: border-box; }
+
+/* overscroll-behavior: none desliga o "puxar para baixo e recarregar"
+   do Chrome, que fazia o app atualizar sem querer */
+html, body { overscroll-behavior-y: none; }
+
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family: Nunito, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   background: var(--fundo);
   color: var(--texto);
 }
@@ -48,11 +42,11 @@ h1 { font-size: 1.4rem; margin: 0 0 4px; }
 input, textarea, select, button {
   font: inherit;
   width: 100%;
-  border-radius: 10px;
+  border-radius: 16px;
 }
 input, textarea, select {
-  padding: 12px;
-  border: 1px solid var(--borda);
+  padding: 12px 14px;
+  border: 1.5px solid var(--borda);
   background: var(--cartao);
   color: var(--texto);
   margin-bottom: 10px;
@@ -64,8 +58,13 @@ button {
   border: none;
   background: var(--destaque);
   color: #fff;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
+}
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--destaque);
+  box-shadow: 0 0 0 4px var(--destaque-claro);
 }
 button:disabled { opacity: .5; cursor: default; }
 .link {
@@ -82,19 +81,24 @@ button:disabled { opacity: .5; cursor: default; }
 /* ===== Chaves (áreas e abas) ===== */
 .chave {
   display: flex;
-  background: var(--cartao);
-  border: 1px solid var(--borda);
-  border-radius: 12px;
+  background: var(--destaque-claro);
+  border-radius: 999px;
   padding: 4px;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
   gap: 4px;
 }
 .chave button {
   background: none;
   color: var(--suave);
-  font-weight: 500;
+  font-weight: 600;
   padding: 10px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
+.chave button svg { width: 18px; height: 18px; }
 .chave button.ativa {
   background: var(--destaque);
   color: #fff;
@@ -116,24 +120,27 @@ button:disabled { opacity: .5; cursor: default; }
   margin: 0 auto;
   padding: 10px 12px;
 }
-.topo h1 { flex: 1; margin: 0; font-size: 1.15rem; }
+.titulos { flex: 1; min-width: 0; }
+.saudacao { display: block; font-size: .85rem; color: var(--suave); }
+.topo h1 { margin: 0; font-size: 1.45rem; font-weight: 800; line-height: 1.15; }
 .btn-menu {
-  width: 40px;
-  height: 40px;
-  padding: 8px;
-  background: none;
+  width: 44px;
+  height: 44px;
+  padding: 11px;
+  border-radius: 50%;
+  background: var(--destaque-claro);
   color: var(--texto);
   flex: none;
 }
 .etiqueta-area {
   width: auto;
   flex: none;
-  padding: 6px 12px;
+  padding: 8px 14px;
   border-radius: 999px;
-  background: var(--cartao);
-  border: 1px solid var(--borda);
+  background: var(--destaque-claro);
   color: var(--destaque);
   font-size: .85rem;
+  font-weight: 700;
 }
 svg {
   width: 22px;
@@ -167,7 +174,7 @@ svg {
   position: fixed;
   inset: 0;
   z-index: 20;
-  background: rgba(0, 0, 0, .5);
+  background: rgba(43, 37, 64, .35);
   display: none;
 }
 .menu-fundo.aberto { display: block; }
@@ -198,12 +205,13 @@ svg {
   gap: 12px;
   background: none;
   color: var(--texto);
-  font-weight: 500;
+  font-weight: 600;
   text-align: left;
   padding: 11px 12px;
+  border-radius: 14px;
 }
 .menu-item:hover { background: var(--fundo); }
-.menu-item.ativa { background: var(--destaque); color: #fff; }
+.menu-item.ativa { background: var(--destaque-claro); color: var(--destaque); }
 .menu-item .marca {
   width: 10px; height: 10px;
   border-radius: 50%;
@@ -268,15 +276,15 @@ svg {
 ul { list-style: none; padding: 0; margin: 10px 0 0; }
 li.tarefa {
   background: var(--cartao);
-  border: 1px solid var(--borda);
-  border-radius: 10px;
-  padding: 12px;
-  margin-bottom: 8px;
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
+  padding: 13px 14px;
+  margin-bottom: 10px;
   cursor: pointer;
   overflow-wrap: anywhere;
 }
 li.tarefa:active { opacity: .7; }
-li.tarefa.rodando { border-color: var(--ok); border-width: 2px; }
+li.tarefa.rodando { outline: 2px solid var(--ok); outline-offset: -2px; }
 li.tarefa small { display: block; color: var(--suave); margin-top: 4px; font-size: .8rem; }
 li.tarefa small .atrasada { color: var(--erro); font-weight: 600; }
 .bolinha {
@@ -288,59 +296,129 @@ li.tarefa small .atrasada { color: var(--erro); font-weight: 600; }
 }
 .vazio { color: var(--suave); text-align: center; padding: 14px 0; font-size: .9rem; }
 
-/* ===== Matriz 2x2 ===== */
+/* ===== Matriz =====
+   O mesmo HTML aparece de dois jeitos. A classe na div #matriz decide:
+   - sem classe extra  → "Quadros" (grade 2x2, cartões pastel)
+   - .modo-lista       → "Lista" (uma coluna, cada quadrante abre e fecha) */
+
+/* cada quadrante pega sua cor forte (--cor) e clara (--cor-fundo) */
+.q1 { --cor: var(--q1); --cor-fundo: var(--q1-fundo); }
+.q2 { --cor: var(--q2); --cor-fundo: var(--q2-fundo); }
+.q3 { --cor: var(--q3); --cor-fundo: var(--q3-fundo); }
+.q4 { --cor: var(--q4); --cor-fundo: var(--q4-fundo); }
+
 .eixos {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: 12px;
   color: var(--suave);
   font-size: .8rem;
+  font-weight: 600;
   text-align: center;
   margin-bottom: 6px;
 }
 .matriz {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: 12px;
 }
+
+/* --- Formato Quadros --- */
 .quadrante {
-  background: var(--fundo);
-  border: 1px solid var(--borda);
-  border-top: 4px solid var(--cor);
-  border-radius: 12px;
-  padding: 10px 8px;
-  min-height: 160px;
+  background: var(--cor-fundo);
+  border-radius: 26px;
+  padding: 14px 10px 10px;
+  min-height: 170px;
   min-width: 0;
 }
-.quadrante h3 {
-  margin: 0;
-  font-size: .95rem;
-  color: var(--cor);
+.cabeca-quadrante {
   display: flex;
-  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  color: var(--cor);
+  padding: 0 4px;
+  text-align: left;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: default;
 }
-.quadrante h3 span { color: var(--suave); font-weight: 400; }
-.quadrante .dica { color: var(--suave); font-size: .75rem; margin: 2px 0 0; }
-.quadrante ul { margin-top: 8px; }
-.quadrante li.tarefa { padding: 9px; font-size: .9rem; }
+.cabeca-quadrante .nome-quadrante { flex: 1; }
+.cabeca-quadrante .contagem { font-weight: 700; opacity: .7; }
+.cabeca-quadrante .num, .cabeca-quadrante .seta { display: none; }  /* só aparecem na Lista */
+.quadrante .dica { color: var(--cor); opacity: .75; font-size: .75rem; margin: 2px 4px 0; }
+.quadrante ul { margin-top: 10px; }
+.quadrante li.tarefa {
+  background: rgba(255, 255, 255, .8);
+  box-shadow: none;
+  border-radius: 16px;
+  padding: 10px 12px;
+  font-size: .92rem;
+}
 
-.q1 { --cor: var(--q1); }
-.q2 { --cor: var(--q2); }
-.q3 { --cor: var(--q3); }
-.q4 { --cor: var(--q4); }
+/* --- Formato Lista --- */
+.matriz.modo-lista { grid-template-columns: 1fr; gap: 10px; }
+#secao-matriz:has(.modo-lista) .eixos { display: none; }   /* eixos só fazem sentido na grade */
+.modo-lista .quadrante {
+  background: var(--cartao);
+  box-shadow: var(--sombra);
+  border-radius: var(--raio);
+  padding: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+.modo-lista .cabeca-quadrante {
+  background: var(--cor-fundo);
+  padding: 12px 14px;
+  cursor: pointer;
+  border-radius: 0;
+}
+.modo-lista .cabeca-quadrante .num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  background: var(--cor);
+  color: #fff;
+  font-size: .85rem;
+}
+.modo-lista .cabeca-quadrante .seta {
+  display: block;
+  width: 18px;
+  height: 18px;
+  transition: transform .15s ease;
+}
+.modo-lista .quadrante .dica { display: none; }
+.modo-lista .quadrante ul { margin: 0; padding: 4px 10px 8px; }
+.modo-lista .quadrante li.tarefa {
+  background: none;
+  border-radius: 0;
+  border-bottom: 1px solid var(--borda);
+  margin: 0;
+  padding: 12px 6px;
+}
+.modo-lista .quadrante li.tarefa:last-child { border-bottom: none; }
+/* quadrante fechado: esconde a lista e gira a seta */
+.modo-lista .quadrante.fechado ul { display: none; }
+.modo-lista .quadrante.fechado .seta { transform: rotate(-90deg); }
+
+.formato-matriz { max-width: 260px; }
 
 /* ===== Ficha da tarefa ===== */
 dialog {
   width: min(560px, calc(100% - 16px));
   max-height: calc(100% - 24px);
   overflow-y: auto;
-  border: 1px solid var(--borda);
-  border-radius: 16px;
+  border: none;
+  border-radius: 28px;
+  box-shadow: 0 20px 60px rgba(43, 37, 64, .25);
   background: var(--cartao);
   color: var(--texto);
   padding: 18px 16px;
 }
-dialog::backdrop { background: rgba(0, 0, 0, .55); }
+dialog::backdrop { background: rgba(43, 37, 64, .4); }
 dialog h2 { margin: 0 0 12px; font-size: 1.1rem; }
 dialog h3 {
   margin: 18px 0 8px;
@@ -435,9 +513,9 @@ li.tarefa .hora {
 }
 .cartao-num {
   background: var(--cartao);
-  border: 1px solid var(--borda);
-  border-radius: 12px;
-  padding: 12px;
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
+  padding: 14px;
 }
 .cartao-num .rotulo { display: block; color: var(--suave); font-size: .8rem; }
 .cartao-num strong { font-size: 1.4rem; font-variant-numeric: tabular-nums; }
@@ -480,11 +558,12 @@ li.tarefa.pendente-envio { border-style: dashed; opacity: .8; cursor: default; }
 /* ===== Matriz: faixa "Sem quadrante" e arrastar ===== */
 .sem-quadrante {
   background: var(--cartao);
-  border: 1px dashed var(--borda);
-  border-radius: 12px;
-  padding: 10px;
+  border: 2px dashed var(--borda);
+  border-radius: 22px;
+  padding: 12px;
   margin-bottom: 14px;
 }
+.sem-quadrante li.tarefa { box-shadow: none; background: var(--fundo); }
 .sem-quadrante h3 {
   margin: 0;
   font-size: .95rem;

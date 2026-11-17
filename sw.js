@@ -7,7 +7,7 @@
 
 // Troque este número sempre que publicar uma versão nova do app,
 // assim o celular descarta a cópia antiga.
-const VERSAO = 'v7';
+const VERSAO = 'v8';
 const CACHE = 'minha-eisenhower-' + VERSAO;
 
 const ARQUIVOS_DO_APP = [
@@ -56,8 +56,10 @@ self.addEventListener('fetch', (evento) => {
   if (pedido.method !== 'GET') return;
   const url = new URL(pedido.url);
 
-  // Bibliotecas da CDN: usa a cópia guardada (elas não mudam); se não tiver, baixa
-  if (url.hostname === 'cdn.jsdelivr.net') {
+  // Bibliotecas da CDN e a fonte (Google Fonts): usa a cópia guardada
+  // (elas não mudam); se não tiver, baixa e guarda para a próxima vez
+  const DE_FORA = ['cdn.jsdelivr.net', 'fonts.googleapis.com', 'fonts.gstatic.com'];
+  if (DE_FORA.includes(url.hostname)) {
     evento.respondWith(
       caches.match(pedido).then((guardada) => guardada || fetch(pedido).then((resposta) => {
         const copia = resposta.clone();

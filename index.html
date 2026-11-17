@@ -7,10 +7,12 @@
 
   <!-- Isto transforma a página num app instalável -->
   <link rel="manifest" href="manifest.webmanifest">
-  <meta name="theme-color" content="#1f5fbf">
+  <meta name="theme-color" content="#fbfaff">
   <link rel="icon" href="icone-192.png">
   <link rel="apple-touch-icon" href="icone-192.png">
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800&display=swap">
   <link rel="stylesheet" href="estilo.css">
 </head>
 <body>
@@ -98,7 +100,10 @@
         <button type="button" class="btn-menu" id="btn-menu" aria-label="Abrir menu">
           <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
         </button>
-        <h1 id="titulo-tela">Capturar</h1>
+        <div class="titulos">
+          <span class="saudacao" id="saudacao">Olá</span>
+          <h1 id="titulo-tela">Capturar</h1>
+        </div>
         <button type="button" class="etiqueta-area" id="etiqueta-area" title="Trocar de área"></button>
       </div>
     </header>
@@ -151,25 +156,57 @@
         <ul id="lista-q0" class="lista-arrastavel" data-q="0"></ul>
       </div>
 
+      <!-- Dois jeitos de ver a mesma matriz: o CSS muda, o conteúdo é o mesmo -->
+      <div class="chave formato-matriz" id="formato-matriz" role="group" aria-label="Formato da matriz">
+        <button type="button" data-formato="quadros" class="ativa">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>
+          Quadros
+        </button>
+        <button type="button" data-formato="lista">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+          Lista
+        </button>
+      </div>
+
       <div class="eixos"><span>Urgente</span><span>Não urgente</span></div>
-      <div class="matriz">
-        <div class="quadrante q1">
-          <h3>Fazer agora <span id="cont-1"></span></h3>
+      <div class="matriz" id="matriz">
+        <div class="quadrante q1" data-q="1">
+          <button type="button" class="cabeca-quadrante" aria-expanded="true">
+            <span class="num">1</span>
+            <span class="nome-quadrante">Fazer agora</span>
+            <span class="contagem" id="cont-1"></span>
+            <svg class="seta" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
           <p class="dica">Importante e urgente</p>
           <ul id="lista-q1" class="lista-arrastavel" data-q="1"></ul>
         </div>
-        <div class="quadrante q2">
-          <h3>Agendar <span id="cont-2"></span></h3>
+        <div class="quadrante q2" data-q="2">
+          <button type="button" class="cabeca-quadrante" aria-expanded="true">
+            <span class="num">2</span>
+            <span class="nome-quadrante">Agendar</span>
+            <span class="contagem" id="cont-2"></span>
+            <svg class="seta" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
           <p class="dica">Importante, sem pressa</p>
           <ul id="lista-q2" class="lista-arrastavel" data-q="2"></ul>
         </div>
-        <div class="quadrante q3">
-          <h3>Delegar <span id="cont-3"></span></h3>
+        <div class="quadrante q3" data-q="3">
+          <button type="button" class="cabeca-quadrante" aria-expanded="true">
+            <span class="num">3</span>
+            <span class="nome-quadrante">Delegar</span>
+            <span class="contagem" id="cont-3"></span>
+            <svg class="seta" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
           <p class="dica">Urgente, pouco importante</p>
           <ul id="lista-q3" class="lista-arrastavel" data-q="3"></ul>
         </div>
-        <div class="quadrante q4">
-          <h3>Eliminar <span id="cont-4"></span></h3>
+        <div class="quadrante q4" data-q="4">
+          <button type="button" class="cabeca-quadrante" aria-expanded="true">
+            <span class="num">4</span>
+            <span class="nome-quadrante">Eliminar</span>
+            <span class="contagem" id="cont-4"></span>
+            <svg class="seta" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
           <p class="dica">Nem urgente nem importante</p>
           <ul id="lista-q4" class="lista-arrastavel" data-q="4"></ul>
         </div>
