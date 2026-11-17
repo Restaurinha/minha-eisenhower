@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Minha Eisenhower</title>
+
+  <!-- Isto transforma a página num app instalável -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#1f5fbf">
+  <link rel="icon" href="icone-192.png">
+  <link rel="apple-touch-icon" href="icone-192.png">
+
+  <style>
+    /* ===== Cores e base ===== */
+    :root {
+      --fundo: #f4f5f7;
+      --cartao: #ffffff;
+      --texto: #1d2330;
+      --suave: #6b7280;
+      --borda: #e2e5ea;
+      --destaque: #1f5fbf;
+      --erro: #c62828;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --fundo: #12151b;
+        --cartao: #1b1f27;
+        --texto: #e8eaee;
+        --suave: #9aa1ad;
+        --borda: #2c323d;
+        --destaque: #5b9bff;
+        --erro: #ff6b6b;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--fundo);
+      color: var(--texto);
+    }
+    main {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 20px 16px 40px;
+    }
+    h1 { font-size: 1.4rem; margin: 0 0 4px; }
+    .sub { color: var(--suave); margin: 0 0 20px; font-size: .9rem; }
+
+    /* ===== Campos e botões ===== */
+    input, textarea, button {
+      font: inherit;
+      width: 100%;
+      border-radius: 10px;
+    }
+    input, textarea {
+      padding: 12px;
+      border: 1px solid var(--borda);
+      background: var(--cartao);
+      color: var(--texto);
+      margin-bottom: 10px;
+    }
+    textarea { min-height: 90px; resize: vertical; font-size: 1.05rem; }
+    button {
+      padding: 12px;
+      border: none;
+      background: var(--destaque);
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:disabled { opacity: .5; cursor: default; }
+    .link {
+      background: none;
+      color: var(--suave);
+      width: auto;
+      padding: 4px 0;
+      font-weight: 400;
+      text-decoration: underline;
+    }
+    .msg { min-height: 1.2em; font-size: .9rem; margin: 6px 0 0; }
+    .msg.erro { color: var(--erro); }
+
+    /* ===== Chave Trabalho / Pessoal ===== */
+    .chave {
+      display: flex;
+      background: var(--cartao);
+      border: 1px solid var(--borda);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 16px;
+    }
+    .chave button {
+      background: none;
+      color: var(--suave);
+      font-weight: 500;
+    }
+    .chave button.ativa {
+      background: var(--destaque);
+      color: #fff;
+    }
+
+    /* ===== Caixa de entrada ===== */
+    .topo-lista {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-top: 28px;
+    }
+    .topo-lista h2 { font-size: 1.05rem; margin: 0; }
+    .contador { color: var(--suave); font-size: .9rem; }
+    ul { list-style: none; padding: 0; margin: 10px 0 0; }
+    li {
+      background: var(--cartao);
+      border: 1px solid var(--borda);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 8px;
+    }
+    li small { display: block; color: var(--suave); margin-top: 4px; }
+    .vazio { color: var(--suave); text-align: center; padding: 20px 0; }
+
+    .rodape {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 24px;
+      color: var(--suave);
+      font-size: .85rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== TELA 0: Login ===== -->
+  <main id="tela-login" hidden>
+    <h1>Minha Eisenhower</h1>
+    <p class="sub">Entre com o usuário que você criou no Supabase.</p>
+    <form id="form-login">
+      <input id="email" type="email" placeholder="E-mail" autocomplete="username" required>
+      <input id="senha" type="password" placeholder="Senha" autocomplete="current-password" required>
+      <button type="submit" id="btn-entrar">Entrar</button>
+      <p class="msg erro" id="msg-login"></p>
+    </form>
+  </main>
+
+  <!-- ===== TELA 1: Captura rápida ===== -->
+  <main id="tela-captura" hidden>
+    <h1>Minha Eisenhower</h1>
+    <p class="sub">Joga aqui e classifica depois.</p>
+
+    <!-- Os botões das áreas são criados pelo JavaScript, a partir do banco -->
+    <div class="chave" id="chave-areas"></div>
+
+    <form id="form-captura">
+      <textarea id="titulo" placeholder="O que você precisa lembrar?" required></textarea>
+      <button type="submit" id="btn-salvar">Salvar</button>
+      <p class="msg" id="msg-captura"></p>
+    </form>
+
+    <div class="topo-lista">
+      <h2>Caixa de entrada</h2>
+      <span class="contador" id="contador"></span>
+    </div>
+    <ul id="lista-caixa"></ul>
+
+    <div class="rodape">
+      <span id="usuario-logado"></span>
+      <button class="link" id="btn-sair">Sair</button>
+    </div>
+  </main>
+
+  <!-- Biblioteca oficial do Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    // =========================================================
+    // 1. CONEXÃO COM O BANCO
+    // =========================================================
+    // A URL e a chave pública identificam o SEU projeto.
+    // A chave pública pode ficar no código: quem protege os dados
+    // são as regras de acesso (policies) que criamos no banco.
+    const SUPABASE_URL = 'https://tiphtsjrvqexoystccmd.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_p8Jxumb_YDS-3D-LhS7w_w_pIUeedyR';
+
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // Guarda qual área está selecionada (Trabalho ou Pessoal)
+    let areaAtual = null;
+
+    // Atalho para pegar elementos da página pelo id
+    const el = (id) => document.getElementById(id);
+
+
+    // =========================================================
+    // 2. QUAL TELA MOSTRAR
+    // =========================================================
+    function mostrarTela(nome) {
+      el('tela-login').hidden = nome !== 'login';
+      el('tela-captura').hidden = nome !== 'captura';
+    }
+
+    // Ao abrir o app: já existe alguém logado neste navegador?
+    async function iniciar() {
+      const { data } = await db.auth.getSession();
+
+      if (data.session) {
+        await abrirCaptura(data.session.user);
+      } else {
+        mostrarTela('login');
+      }
+    }
+
+
+    // =========================================================
+    // 3. LOGIN E SAIR
+    // =========================================================
+    el('form-login').addEventListener('submit', async (evento) => {
+      evento.preventDefault(); // impede a página de recarregar
+      el('btn-entrar').disabled = true;
+      el('msg-login').textContent = '';
+
+      const { data, error } = await db.auth.signInWithPassword({
+        email: el('email').value.trim(),
+        password: el('senha').value,
+      });
+
+      el('btn-entrar').disabled = false;
+
+      if (error) {
+        el('msg-login').textContent = 'Não consegui entrar: ' + error.message;
+        console.error('Erro no login:', error);
+        return;
+      }
+
+      await abrirCaptura(data.user);
+    });
+
+    el('btn-sair').addEventListener('click', async () => {
+      await db.auth.signOut();
+      mostrarTela('login');
+    });
+
+
+    // =========================================================
+    // 4. TELA DE CAPTURA
+    // =========================================================
+    async function abrirCaptura(usuario) {
+      el('usuario-logado').textContent = usuario.email;
+      mostrarTela('captura');
+      await carregarAreas();
+      await carregarCaixaEntrada();
+      el('titulo').focus();
+    }
+
+    // Busca as áreas no banco e monta os botões da chave
+    async function carregarAreas() {
+      const { data: areas, error } = await db
+        .from('areas')
+        .select('id, nome')
+        .order('id');
+
+      if (error) {
+        console.error('Erro ao carregar áreas:', error);
+        return;
+      }
+
+      // Começa na primeira área (Trabalho), se nenhuma estiver escolhida
+      if (areaAtual === null && areas.length > 0) {
+        areaAtual = areas[0].id;
+      }
+
+      const chave = el('chave-areas');
+      chave.innerHTML = '';
+
+      areas.forEach((area) => {
+        const botao = document.createElement('button');
+        botao.type = 'button';
+        botao.textContent = area.nome;
+        botao.classList.toggle('ativa', area.id === areaAtual);
+        botao.addEventListener('click', () => {
+          areaAtual = area.id;
+          carregarAreas();
+          carregarCaixaEntrada();
+        });
+        chave.appendChild(botao);
+      });
+    }
+
+    // Salva a pendência só com o título (o resto fica para a classificação)
+    el('form-captura').addEventListener('submit', async (evento) => {
+      evento.preventDefault();
+      const titulo = el('titulo').value.trim();
+      if (!titulo) return;
+
+      el('btn-salvar').disabled = true;
+      el('msg-captura').className = 'msg';
+      el('msg-captura').textContent = 'Salvando...';
+
+      // Não mandamos o usuario_id: o banco preenche sozinho com auth.uid()
+      const { error } = await db
+        .from('tarefas')
+        .insert({ titulo: titulo, area_id: areaAtual });
+
+      el('btn-salvar').disabled = false;
+
+      if (error) {
+        el('msg-captura').className = 'msg erro';
+        el('msg-captura').textContent = 'Erro ao salvar: ' + error.message;
+        console.error('Erro ao salvar tarefa:', error);
+        return;
+      }
+
+      el('titulo').value = '';
+      el('msg-captura').textContent = 'Salvo!';
+      setTimeout(() => (el('msg-captura').textContent = ''), 1500);
+      el('titulo').focus();
+      await carregarCaixaEntrada();
+    });
+
+    // Caixa de entrada = tarefas sem quadrante e não concluídas,
+    // da área atual ou ainda sem área
+    async function carregarCaixaEntrada() {
+      const { data: tarefas, error } = await db
+        .from('tarefas')
+        .select('id, titulo, criado_em')
+        .is('quadrante', null)
+        .neq('status', 'concluida')
+        .or(`area_id.eq.${areaAtual},area_id.is.null`)
+        .order('criado_em', { ascending: false });
+
+      if (error) {
+        console.error('Erro ao carregar caixa de entrada:', error);
+        return;
+      }
+
+      el('contador').textContent =
+        tarefas.length === 1 ? '1 item' : `${tarefas.length} itens`;
+
+      const lista = el('lista-caixa');
+      lista.innerHTML = '';
+
+      if (tarefas.length === 0) {
+        lista.innerHTML = '<li class="vazio">Nada pendente aqui.</li>';
+        return;
+      }
+
+      tarefas.forEach((tarefa) => {
+        const item = document.createElement('li');
+        // textContent (e não innerHTML) evita que um texto digitado
+        // seja interpretado como código na página
+        item.textContent = tarefa.titulo;
+
+        const data = document.createElement('small');
+        data.textContent = new Date(tarefa.criado_em)
+          .toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+
+        item.appendChild(data);
+        lista.appendChild(item);
+      });
+    }
+
+
+    // =========================================================
+    // 5. COMEÇA AQUI
+    // =========================================================
+    iniciar();
+
+    // Registra o service worker (só funciona em https ou localhost,
+    // por isso não faz nada quando você abre o arquivo com duplo clique)
+    if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+      navigator.serviceWorker.register('sw.js')
+        .catch((erro) => console.error('Erro ao registrar o service worker:', erro));
+    }
+  </script>
+</body>
+</html>
