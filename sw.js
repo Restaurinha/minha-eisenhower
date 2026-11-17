@@ -1,27 +1,42 @@
 // =========================================================
 // SERVICE WORKER
 // Um "ajudante" que o navegador roda em segundo plano para o app.
-// Hoje ele só guarda a tela do app para abrir rápido.
-// Mais pra frente é ele que vai receber as notificações.
+// Ele guarda os arquivos do app no celular, para abrir mesmo sem internet.
+// Na próxima etapa, é ele que vai receber as notificações.
 // =========================================================
 
 // Troque este número sempre que publicar uma versão nova do app,
 // assim o celular descarta a cópia antiga.
-const VERSAO = 'v5';
+const VERSAO = 'v6';
 const CACHE = 'minha-eisenhower-' + VERSAO;
 
 const ARQUIVOS_DO_APP = [
   './',
   './index.html',
+  './estilo.css',
+  './app.js',
   './manifest.webmanifest',
   './icone-192.png',
   './icone-512.png',
 ];
 
-// Instalação: guarda os arquivos do app
+// Bibliotecas que vêm de fora (CDN). Também guardamos, senão o app
+// abriria sem internet mas quebraria por falta delas.
+const BIBLIOTECAS = [
+  'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
+  'https://cdn.jsdelivr.net/npm/sortablejs@1.15/Sortable.min.js',
+];
+
+// Instalação: guarda os arquivos do app e as bibliotecas
 self.addEventListener('install', (evento) => {
   evento.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(ARQUIVOS_DO_APP))
+    caches.open(CACHE).then(async (cache) => {
+      await cache.addAll(ARQUIVOS_DO_APP);
+      // no-cors: a CDN é outro site; guardamos a resposta "fechada" mesmo assim
+      await Promise.all(BIBLIOTECAS.map((url) =>
+        fetch(url, { mode: 'no-cors' }).then((r) => cache.put(url, r)).catch(() => {})
+      ));
+    })
   );
   self.skipWaiting();
 });
@@ -36,20 +51,34 @@ self.addEventListener('activate', (evento) => {
   self.clients.claim();
 });
 
-// Busca: tenta a internet primeiro; se estiver sem sinal, usa a cópia guardada.
-// Só vale para os arquivos do próprio app. Os dados do Supabase
-// sempre vêm direto do banco, nunca de cópia guardada.
 self.addEventListener('fetch', (evento) => {
-  const url = new URL(evento.request.url);
-  if (evento.request.method !== 'GET' || url.origin !== self.location.origin) return;
+  const pedido = evento.request;
+  if (pedido.method !== 'GET') return;
+  const url = new URL(pedido.url);
 
+  // Bibliotecas da CDN: usa a cópia guardada (elas não mudam); se não tiver, baixa
+  if (url.hostname === 'cdn.jsdelivr.net') {
+    evento.respondWith(
+      caches.match(pedido).then((guardada) => guardada || fetch(pedido).then((resposta) => {
+        const copia = resposta.clone();
+        caches.open(CACHE).then((cache) => cache.put(pedido, copia));
+        return resposta;
+      }))
+    );
+    return;
+  }
+
+  // Arquivos do próprio app: tenta a internet primeiro (pega versão nova);
+  // sem sinal, usa a cópia guardada.
+  // Os dados do Supabase não passam por aqui: vêm sempre direto do banco.
+  if (url.origin !== self.location.origin) return;
   evento.respondWith(
-    fetch(evento.request)
+    fetch(pedido)
       .then((resposta) => {
         const copia = resposta.clone();
-        caches.open(CACHE).then((cache) => cache.put(evento.request, copia));
+        caches.open(CACHE).then((cache) => cache.put(pedido, copia));
         return resposta;
       })
-      .catch(() => caches.match(evento.request))
+      .catch(() => caches.match(pedido, { ignoreSearch: true }))
   );
 });

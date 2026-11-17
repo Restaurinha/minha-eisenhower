@@ -1,0 +1,533 @@
+/* ===== Cores e base ===== */
+:root {
+  --fundo: #f4f5f7;
+  --cartao: #ffffff;
+  --texto: #1d2330;
+  --suave: #6b7280;
+  --borda: #e2e5ea;
+  --destaque: #1f5fbf;
+  --erro: #c62828;
+  --ok: #2e8b57;
+  --q1: #d64545;  /* Fazer agora  */
+  --q2: #1f5fbf;  /* Agendar      */
+  --q3: #d98a1c;  /* Delegar      */
+  --q4: #7a8291;  /* Eliminar     */
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fundo: #12151b;
+    --cartao: #1b1f27;
+    --texto: #e8eaee;
+    --suave: #9aa1ad;
+    --borda: #2c323d;
+    --destaque: #5b9bff;
+    --erro: #ff6b6b;
+    --ok: #3fb67a;
+    --q1: #ff6b6b;
+    --q2: #5b9bff;
+    --q3: #f0a640;
+    --q4: #9aa1ad;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--fundo);
+  color: var(--texto);
+}
+main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 20px 16px 40px;
+}
+h1 { font-size: 1.4rem; margin: 0 0 4px; }
+.sub { color: var(--suave); margin: 0 0 16px; font-size: .9rem; }
+
+/* ===== Campos e botões ===== */
+input, textarea, select, button {
+  font: inherit;
+  width: 100%;
+  border-radius: 10px;
+}
+input, textarea, select {
+  padding: 12px;
+  border: 1px solid var(--borda);
+  background: var(--cartao);
+  color: var(--texto);
+  margin-bottom: 10px;
+}
+input[type="checkbox"] { width: 20px; height: 20px; margin: 0; flex: none; }
+textarea { min-height: 90px; resize: vertical; font-size: 1.05rem; }
+button {
+  padding: 12px;
+  border: none;
+  background: var(--destaque);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+button:disabled { opacity: .5; cursor: default; }
+.link {
+  background: none;
+  color: var(--suave);
+  width: auto;
+  padding: 4px 0;
+  font-weight: 400;
+  text-decoration: underline;
+}
+.msg { min-height: 1.2em; font-size: .9rem; margin: 6px 0 0; }
+.msg.erro { color: var(--erro); }
+
+/* ===== Chaves (áreas e abas) ===== */
+.chave {
+  display: flex;
+  background: var(--cartao);
+  border: 1px solid var(--borda);
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 12px;
+  gap: 4px;
+}
+.chave button {
+  background: none;
+  color: var(--suave);
+  font-weight: 500;
+  padding: 10px;
+}
+.chave button.ativa {
+  background: var(--destaque);
+  color: #fff;
+}
+
+/* ===== Cabeçalho fixo no topo ===== */
+.cabecalho {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--fundo);
+  border-bottom: 1px solid var(--borda);
+}
+.topo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 10px 12px;
+}
+.topo h1 { flex: 1; margin: 0; font-size: 1.15rem; }
+.btn-menu {
+  width: 40px;
+  height: 40px;
+  padding: 8px;
+  background: none;
+  color: var(--texto);
+  flex: none;
+}
+.etiqueta-area {
+  width: auto;
+  flex: none;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--cartao);
+  border: 1px solid var(--borda);
+  color: var(--destaque);
+  font-size: .85rem;
+}
+svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: none;
+}
+
+/* ===== Menu lateral ===== */
+.menu {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 30;
+  width: 260px;
+  background: var(--cartao);
+  border-right: 1px solid var(--borda);
+  display: flex;
+  flex-direction: column;
+  padding: 16px 12px;
+  transform: translateX(-100%);   /* escondido fora da tela */
+  transition: transform .2s ease;
+}
+.menu.aberto { transform: translateX(0); }
+.menu-fundo {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: rgba(0, 0, 0, .5);
+  display: none;
+}
+.menu-fundo.aberto { display: block; }
+.menu-topo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 8px 16px;
+}
+.menu-topo img { border-radius: 8px; }
+.menu-grupo {
+  border-top: 1px solid var(--borda);
+  padding: 10px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.menu-rotulo {
+  color: var(--suave);
+  font-size: .75rem;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  padding: 4px 12px 6px;
+}
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: none;
+  color: var(--texto);
+  font-weight: 500;
+  text-align: left;
+  padding: 11px 12px;
+}
+.menu-item:hover { background: var(--fundo); }
+.menu-item.ativa { background: var(--destaque); color: #fff; }
+.menu-item .marca {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  margin: 0 6px;
+}
+.menu-item.ativa .marca { background: currentColor; }
+.menu-rodape {
+  margin-top: auto;
+  border-top: 1px solid var(--borda);
+  padding: 12px 12px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  color: var(--suave);
+  font-size: .8rem;
+  overflow-wrap: anywhere;
+}
+
+/* Tela larga (computador): menu sempre visível, sem botão ☰ */
+@media (min-width: 900px) {
+  .menu { transform: none; }
+  .menu-fundo, .menu-fundo.aberto { display: none; }
+  .btn-menu { display: none; }
+  #tela-app { padding-left: 260px; }  /* abre espaço para o menu; o resto se centraliza ao lado */
+}
+
+/* ===== Barra do cronômetro rodando ===== */
+.barra-cronometro {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--ok);
+  color: #fff;
+  padding: 10px 16px;
+  font-size: .9rem;
+}
+.barra-cronometro .nome {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.barra-cronometro strong { font-variant-numeric: tabular-nums; }
+.barra-cronometro button {
+  width: auto;
+  background: rgba(255, 255, 255, .2);
+  padding: 6px 12px;
+}
+
+/* ===== Listas de tarefas ===== */
+.topo-lista {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: 24px;
+}
+.topo-lista h2 { font-size: 1.05rem; margin: 0; }
+.contador { color: var(--suave); font-size: .9rem; }
+ul { list-style: none; padding: 0; margin: 10px 0 0; }
+li.tarefa {
+  background: var(--cartao);
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+li.tarefa:active { opacity: .7; }
+li.tarefa.rodando { border-color: var(--ok); border-width: 2px; }
+li.tarefa small { display: block; color: var(--suave); margin-top: 4px; font-size: .8rem; }
+li.tarefa small .atrasada { color: var(--erro); font-weight: 600; }
+.bolinha {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+.vazio { color: var(--suave); text-align: center; padding: 14px 0; font-size: .9rem; }
+
+/* ===== Matriz 2x2 ===== */
+.eixos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  color: var(--suave);
+  font-size: .8rem;
+  text-align: center;
+  margin-bottom: 6px;
+}
+.matriz {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.quadrante {
+  background: var(--fundo);
+  border: 1px solid var(--borda);
+  border-top: 4px solid var(--cor);
+  border-radius: 12px;
+  padding: 10px 8px;
+  min-height: 160px;
+  min-width: 0;
+}
+.quadrante h3 {
+  margin: 0;
+  font-size: .95rem;
+  color: var(--cor);
+  display: flex;
+  justify-content: space-between;
+}
+.quadrante h3 span { color: var(--suave); font-weight: 400; }
+.quadrante .dica { color: var(--suave); font-size: .75rem; margin: 2px 0 0; }
+.quadrante ul { margin-top: 8px; }
+.quadrante li.tarefa { padding: 9px; font-size: .9rem; }
+
+.q1 { --cor: var(--q1); }
+.q2 { --cor: var(--q2); }
+.q3 { --cor: var(--q3); }
+.q4 { --cor: var(--q4); }
+
+/* ===== Ficha da tarefa ===== */
+dialog {
+  width: min(560px, calc(100% - 16px));
+  max-height: calc(100% - 24px);
+  overflow-y: auto;
+  border: 1px solid var(--borda);
+  border-radius: 16px;
+  background: var(--cartao);
+  color: var(--texto);
+  padding: 18px 16px;
+}
+dialog::backdrop { background: rgba(0, 0, 0, .55); }
+dialog h2 { margin: 0 0 12px; font-size: 1.1rem; }
+dialog h3 {
+  margin: 18px 0 8px;
+  font-size: .95rem;
+  border-top: 1px solid var(--borda);
+  padding-top: 14px;
+}
+dialog label { display: block; font-size: .85rem; color: var(--suave); margin-bottom: 4px; }
+#dlg-descricao { min-height: 60px; font-size: .95rem; }
+.duas-colunas { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.duas-colunas > div { min-width: 0; }
+
+.escolha-quadrante {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.escolha-quadrante button {
+  background: none;
+  border: 2px solid var(--cor);
+  color: var(--cor);
+  font-size: .9rem;
+  padding: 10px 6px;
+}
+.escolha-quadrante button.ativa {
+  background: var(--cor);
+  color: #fff;
+}
+
+/* subtarefas */
+#dlg-subtarefas li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--borda);
+}
+#dlg-subtarefas li span { flex: 1; overflow-wrap: anywhere; }
+#dlg-subtarefas li.feita span { text-decoration: line-through; color: var(--suave); }
+#dlg-subtarefas li button {
+  width: auto;
+  background: none;
+  color: var(--suave);
+  padding: 4px 8px;
+  font-size: 1.1rem;
+}
+.nova-subtarefa { display: flex; gap: 8px; margin-top: 8px; }
+.nova-subtarefa input { margin: 0; }
+.nova-subtarefa button { width: 52px; flex: none; }
+
+/* cronômetro */
+.cronometro {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.cronometro .total { font-size: 1.1rem; font-variant-numeric: tabular-nums; }
+.cronometro .total small { display: block; color: var(--suave); font-size: .8rem; }
+.cronometro button { width: auto; padding: 10px 18px; background: var(--ok); }
+.cronometro button.pausar { background: var(--q3); }
+
+.acoes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 20px; }
+.acoes .secundario { background: none; border: 1px solid var(--borda); color: var(--texto); }
+.acoes .perigo { background: none; border: 1px solid var(--erro); color: var(--erro); }
+.acoes .concluir { background: var(--ok); }
+
+/* ===== Tela Hoje ===== */
+.bloco-hoje { margin-bottom: 18px; }
+.titulo-bloco {
+  font-size: 1rem;
+  margin: 18px 0 0;
+  display: flex;
+  justify-content: space-between;
+}
+.titulo-bloco span { color: var(--suave); font-weight: 400; }
+.titulo-bloco.atrasadas { color: var(--erro); }
+.titulo-bloco.q1-texto { color: var(--q1); }
+li.tarefa .hora {
+  float: right;
+  font-weight: 600;
+  color: var(--destaque);
+  margin-left: 8px;
+}
+
+/* ===== Indicadores ===== */
+.cartoes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.cartao-num {
+  background: var(--cartao);
+  border: 1px solid var(--borda);
+  border-radius: 12px;
+  padding: 12px;
+}
+.cartao-num .rotulo { display: block; color: var(--suave); font-size: .8rem; }
+.cartao-num strong { font-size: 1.4rem; font-variant-numeric: tabular-nums; }
+
+.barras { margin-top: 10px; }
+.barra-linha { margin-bottom: 10px; }
+.barra-linha .cabeca {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: .9rem;
+  margin-bottom: 4px;
+}
+.barra-linha .cabeca span:last-child {
+  color: var(--suave);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.barra-trilho {
+  height: 10px;
+  background: var(--borda);
+  border-radius: 5px;
+  overflow: hidden;
+}
+.barra-preenchida { height: 100%; border-radius: 5px; }
+.dica-pequena { color: var(--suave); font-size: .8rem; margin: 4px 0 0; }
+
+
+/* ===== Aviso de sem internet ===== */
+.aviso-offline {
+  background: var(--q3);
+  color: #fff;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: .9rem;
+  margin: 0 0 14px;
+}
+li.tarefa.pendente-envio { border-style: dashed; opacity: .8; cursor: default; }
+
+/* ===== Matriz: faixa "Sem quadrante" e arrastar ===== */
+.sem-quadrante {
+  background: var(--cartao);
+  border: 1px dashed var(--borda);
+  border-radius: 12px;
+  padding: 10px;
+  margin-bottom: 14px;
+}
+.sem-quadrante h3 {
+  margin: 0;
+  font-size: .95rem;
+  display: flex;
+  justify-content: space-between;
+}
+.sem-quadrante h3 span { color: var(--suave); font-weight: 400; }
+.sem-quadrante .dica { color: var(--suave); font-size: .75rem; margin: 2px 0 0; }
+.lista-arrastavel { min-height: 48px; }          /* lista vazia ainda recebe o "soltar" */
+.lista-arrastavel .vazio { pointer-events: none; }
+.arrastando-fantasma { opacity: .35; }           /* lugar onde o item vai cair */
+.arrastando-item { transform: rotate(2deg); box-shadow: 0 8px 20px rgba(0,0,0,.35); }
+
+/* ===== Categorias ===== */
+#lista-categorias li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--cartao);
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+  padding: 8px;
+  margin-bottom: 8px;
+}
+#lista-categorias li.inativa { opacity: .5; }
+#lista-categorias input[type="text"] { margin: 0; padding: 8px; flex: 1; min-width: 0; }
+input[type="color"] {
+  width: 40px;
+  height: 40px;
+  padding: 2px;
+  margin: 0;
+  flex: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+#lista-categorias label.ativa-chave {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: .8rem;
+  color: var(--suave);
+  flex: none;
+}
+.nova-categoria { display: flex; gap: 8px; margin-top: 10px; align-items: center; }
+.nova-categoria input { margin: 0; }
+.nova-categoria button { width: auto; flex: none; }
