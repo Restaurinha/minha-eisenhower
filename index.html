@@ -13,7 +13,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800&display=swap">
-  <link rel="stylesheet" href="estilo.css?v=11">
+  <link rel="stylesheet" href="estilo.css?v=12">
 </head>
 <body>
 
@@ -282,7 +282,17 @@
   <!-- ===== FICHA DA TAREFA ===== -->
   <dialog id="dlg-tarefa">
     <form method="dialog" id="form-tarefa">
-      <h2>Pendência</h2>
+      <!-- Botões no topo, fixos enquanto a ficha rola -->
+      <div class="topo-ficha">
+        <h2>Pendência</h2>
+        <div class="acoes">
+          <button type="button" id="dlg-salvar">Salvar</button>
+          <button type="button" id="dlg-concluir" class="concluir">Concluir</button>
+          <button type="button" id="dlg-apagar" class="perigo">Apagar</button>
+          <button type="button" id="dlg-cancelar" class="secundario">Fechar</button>
+        </div>
+        <p class="msg erro" id="dlg-msg"></p>
+      </div>
 
       <label for="dlg-titulo">Título</label>
       <textarea id="dlg-titulo" required></textarea>
@@ -362,13 +372,6 @@
         <button type="button" id="dlg-play">▶ Iniciar</button>
       </div>
 
-      <div class="acoes">
-        <button type="button" id="dlg-salvar">Salvar</button>
-        <button type="button" id="dlg-concluir" class="concluir">Concluir</button>
-        <button type="button" id="dlg-apagar" class="perigo">Apagar</button>
-        <button type="button" id="dlg-cancelar" class="secundario">Fechar</button>
-      </div>
-      <p class="msg erro" id="dlg-msg"></p>
     </form>
   </dialog>
 
@@ -377,6 +380,6 @@
   <!-- Biblioteca de arrastar e soltar (funciona com o dedo no celular) -->
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15/Sortable.min.js"></script>
 
-  <script src="app.js?v=11"></script>
+  <script src="app.js?v=12"></script>
 </body>
 </html>

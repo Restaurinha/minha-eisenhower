@@ -1476,7 +1476,7 @@ mostrarBotaoInstalar();
 // 13c. BOTÃO ATUALIZAR (⟳)
 // =========================================================
 // Mantenha igual à VERSAO do sw.js: aparece no rodapé do menu
-const VERSAO_APP = 'v11';
+const VERSAO_APP = 'v12';
 el('versao-app').textContent = 'versão ' + VERSAO_APP;
 
 // Quando um service worker NOVO assume o controle, recarrega a página uma vez,

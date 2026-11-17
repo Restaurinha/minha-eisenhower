@@ -7,14 +7,14 @@
 
 // Troque este número sempre que publicar uma versão nova do app,
 // assim o celular descarta a cópia antiga.
-const VERSAO = 'v11';
+const VERSAO = 'v12';
 const CACHE = 'minha-eisenhower-' + VERSAO;
 
 const ARQUIVOS_DO_APP = [
   './',
   './index.html',
-  './estilo.css?v=11',
-  './app.js?v=11',
+  './estilo.css?v=12',
+  './app.js?v=12',
   './manifest.webmanifest',
   './icone-192.png',
   './icone-512.png',

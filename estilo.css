@@ -482,7 +482,21 @@ dialog label { display: block; font-size: .85rem; color: var(--suave); margin-bo
 .cronometro button { width: auto; padding: 10px 18px; background: var(--ok); }
 .cronometro button.pausar { background: var(--q3); }
 
-.acoes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 20px; }
+/* topo da ficha: título + botões grudados no alto enquanto rola */
+dialog { padding-top: 0; }
+.topo-ficha {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--cartao);
+  padding: 18px 0 10px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--borda);
+}
+.topo-ficha h2 { margin: 0 0 10px; }
+.topo-ficha .msg:empty { display: none; }
+.acoes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.acoes button { padding: 10px 4px; font-size: .85rem; border-radius: 14px; }
 .acoes .secundario { background: none; border: 1px solid var(--borda); color: var(--texto); }
 .acoes .perigo { background: none; border: 1px solid var(--erro); color: var(--erro); }
 .acoes .concluir { background: var(--ok); }
